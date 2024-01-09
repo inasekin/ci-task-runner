@@ -1,0 +1,40 @@
+version: '3.5'
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres-ci-task-runner
+    environment:
+      POSTGRES_USER: "admin_task_runner"
+      POSTGRES_PASSWORD: "ci-task-runner2024!"
+      POSTGRES_DB: "ci_task_runner"
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin_task_runner -d ci_task_runner" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    networks:
+      - postgres
+
+  pgadmin:
+    container_name: pgadmin-ci-task-runner
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "nasekinid8591@yandex.ru"
+      PGADMIN_DEFAULT_PASSWORD: "qwerty12345"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - ./db:/var/lib/pgadmin
+    ports:
+      - "8083:80"
+    restart: unless-stopped
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
